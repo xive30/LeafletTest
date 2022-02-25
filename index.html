@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutoriel Leaflet</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <script src="Longuenesse.geojson" type="text/javascript"></script>
+</head>
+<body>
+    <!-- on définie une div qui définie la map-->
+    <div id="map"></div>
+
+    <script>
+        const map = L.map('map').setView([0, 0], 16);
+
+        // constantes icon de Mua
+        const mua_icon = L.icon({ iconUrl: "Mua.jpg" , iconSize: [50, 50]});
+
+        // on crée une variable avec les points du geoJSON longuenesse
+        let Longuenesse_layer = L.geoJSON(longuenesse, {
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng);
+            }
+        }).addTo(map);
+
+        L.polyline = L.polyline(Longuenesse_layer, {color:"green"}).addTo(map);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        //on demande à ce que la carte s'adapte aux points de Longuenesse_layer avec un padding de 20
+        map.fitBounds(Longuenesse_layer.getBounds(), {
+            padding: [20,20]
+        });
+
+        // créer un groupe de marker
+        const layerGroupMarker = L.layerGroup().addTo(map);
+
+        /*par click:
+        * on efface les marqueurs des groupes précedemment creer
+        * on crée un point avec les coordonées du nouveau point et l'image spéciale
+        * on enregistre dans le groupe LayerGroupMarker 
+        */
+        map.on('click', function (e) {
+            layerGroupMarker.clearLayers();
+            const marker = L.marker([e.latlng.lat, e.latlng.lng], {icon:mua_icon})
+                .bindPopup("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
+                .openPopup();
+            layerGroupMarker.addLayer(marker);
+            map.setView([e.latlng.lat,e.latlng.lng], 20);
+        });
+    </script>
+
+</body>
+</html>
